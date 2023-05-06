@@ -9,19 +9,19 @@ This paper presents a frequency-aware binarized network (FABNet) for single imag
 
 Project Setup
 ------------------------------------------------------------------------------------------------------------------------------------------
-conda create -n FABNet python=3.7
-conda activate LLFormer
-conda install pytorch=1.2 torchvision=0.4 cudatoolkit=10.0 -c pytorch
-pip install pytorch-wavelets matplotlib scikit-image opencv-python h5py tqdm
+conda create -n FABNet python=3.7<br>
+conda activate LLFormer<br>
+conda install pytorch=1.2 torchvision=0.4 cudatoolkit=10.0 -c pytorch<br>
+pip install pytorch-wavelets matplotlib scikit-image opencv-python h5py tqdm<br>
 
 Dataset
 ------------------------------------------------------------------------------------------------------------------------------------------
-You can use the following links to download the datasets
-DIV2K dataset https://cv.snu.ac.kr/research/EDSR/DIV2K.tar
-Set5 http://people.rennes.inria.fr/Aline.Roumy/results/SR_BMVC12.html
-Set14 https://sites.google.com/site/romanzeyde/research-interests
-BSD100 https://www2.eecs.berkeley.edu/Research/Projects/CS/vision/bsds/
-Urban100 https://sites.google.com/site/jbhuang0604/publications/struct_sr
+You can use the following links to download the datasets:<br>
+DIV2K dataset https://cv.snu.ac.kr/research/EDSR/DIV2K.tar<br>
+Set5 http://people.rennes.inria.fr/Aline.Roumy/results/SR_BMVC12.html<br>
+Set14 https://sites.google.com/site/romanzeyde/research-interests<br>
+BSD100 https://www2.eecs.berkeley.edu/Research/Projects/CS/vision/bsds/<br>
+Urban100 https://sites.google.com/site/jbhuang0604/publications/struct_sr<br>
 
 Pretrained Model
 ------------------------------------------------------------------------------------------------------------------------------------------
