@@ -7,10 +7,10 @@ Introduction
 This paper presents a frequency-aware binarized network (FABNet) for single image super-resolution. We decompose the image features into low-frequency and high frequency components and then adopt a "divide-and-conquer" strategy to process them with well-designed binary network structures.
 ![image](https://user-images.githubusercontent.com/54347263/236616873-8cfd7271-9619-434e-bbcb-6ae3fa3e4871.png)
 
-Project Setup
+Dependencies and Installation
 ------------------------------------------------------------------------------------------------------------------------------------------
 conda create -n FABNet python=3.7<br>
-conda activate LLFormer<br>
+conda activate FABNet<br>
 conda install pytorch=1.2 torchvision=0.4 cudatoolkit=10.0 -c pytorch<br>
 pip install pytorch-wavelets matplotlib scikit-image opencv-python h5py tqdm<br>
 
