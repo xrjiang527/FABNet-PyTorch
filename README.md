@@ -1,4 +1,38 @@
 FABNet-PyTorch
 ------------------------------------------------------------------------------------------------------------------------------------------
-
 This is a pytorch project for the paper FABNet: Frequency-Aware Binarized Network for Single Image Super-Resolution by Xinrui Jiang, Nannan Wang, Jingwei Xin, Keyu Li, Xi Yang, Jie Li, Xiaoyu Wang and Xinbo Gao
+
+Introduction
+------------------------------------------------------------------------------------------------------------------------------------------
+This paper presents a frequency-aware binarized network (FABNet) for single image super-resolution. We decompose the image features into low-frequency and high frequency components and then adopt a "divide-and-conquer" strategy to process them with well-designed binary network structures.
+![image](https://user-images.githubusercontent.com/54347263/236616873-8cfd7271-9619-434e-bbcb-6ae3fa3e4871.png)
+
+Project Setup
+------------------------------------------------------------------------------------------------------------------------------------------
+conda create -n FABNet python=3.7
+conda activate LLFormer
+conda install pytorch=1.2 torchvision=0.4 cudatoolkit=10.0 -c pytorch
+pip install pytorch-wavelets matplotlib scikit-image opencv-python h5py tqdm
+
+Dataset
+------------------------------------------------------------------------------------------------------------------------------------------
+You can use the following links to download the datasets
+DIV2K dataset https://cv.snu.ac.kr/research/EDSR/DIV2K.tar
+Set5 http://people.rennes.inria.fr/Aline.Roumy/results/SR_BMVC12.html
+Set14 https://sites.google.com/site/romanzeyde/research-interests
+BSD100 https://www2.eecs.berkeley.edu/Research/Projects/CS/vision/bsds/
+Urban100 https://sites.google.com/site/jbhuang0604/publications/struct_sr
+
+Pretrained Model
+------------------------------------------------------------------------------------------------------------------------------------------
+You can download our trained model using the following links
+
+Usage
+------------------------------------------------------------------------------------------------------------------------------------------
+Train
+Train the model on the corresponding network using the train config. For example, the training on FABNetC12B4:
+
+Test
+Test the model on the corresponding network using the test config with the pretrained model
+
+
