@@ -25,7 +25,7 @@ Urban100 https://sites.google.com/site/jbhuang0604/publications/struct_sr<br>
 
 Pretrained Model
 ------------------------------------------------------------------------------------------------------------------------------------------
-You can download our trained model using the following links
+You can download pre-trained models from: https://pan.baidu.com/s/13SDor2gkPMCmWlp7PZ592A (code：i49h)
 
 Usage
 ------------------------------------------------------------------------------------------------------------------------------------------
