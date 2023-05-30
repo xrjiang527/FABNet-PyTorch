@@ -30,14 +30,14 @@ You can download results from: https://pan.baidu.com/s/1xYEUcNV2_ZY486NhCRSNkg (
 
 Usage
 ------------------------------------------------------------------------------------------------------------------------------------------
-Train
-Train the model on the corresponding network using the train config. For example, the training on FABNetC12B4:
-train_model:  import model.FABNet_tiny as model
-python train.py --n_feats 12
+Train<br>
+Train the model on the corresponding network using the train config. For example, the training on FABNetC12B4:<br>
+train_model:  import model.FABNet_tiny as model<br>
+python train.py --n_feats 12<br>
 
-Test
-Test the model on the corresponding network using the test config with the pretrained model. For example, the testing on FABNetC12B4:
-train_model:  import model.FABNet_tiny as model
-python test.py --data_type img --n_feats 12 --pre_model */FABNet_B4C12_X2.pth 
+Test<br>
+Test the model on the corresponding network using the test config with the pretrained model. For example, the testing on FABNetC12B4:<br>
+train_model:  import model.FABNet_tiny as model<br>
+python test.py --data_type img --n_feats 12 --pre_model */FABNet_B4C12_X2.pth <br>
 
 
