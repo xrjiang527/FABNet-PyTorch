@@ -5,62 +5,6 @@ from pytorch_wavelets import DWTForward, DWTInverse
 import torch
 
 
-class DyReLU(nn.Module):
-    def __init__(self, channels, reduction=4, k=1, conv_type='2d'):
-        super(DyReLU, self).__init__()
-        self.channels = channels
-        self.k = k
-        self.conv_type = conv_type
-        assert self.conv_type in ['1d', '2d']
-
-        self.fc1 = nn.Linear(channels, channels // reduction)
-        self.relu = nn.ReLU(inplace=True)
-        self.fc2 = nn.Linear(channels // reduction, 2 * k)
-        self.sigmoid = nn.Sigmoid()
-
-        self.register_buffer('lambdas', torch.Tensor([1.]*k + [0.5]*k).float())
-        self.register_buffer('init_v', torch.Tensor([1.] + [0.]*(2 * k - 1)).float())
-
-    def get_relu_coefs(self, x):
-        theta = torch.mean(x, axis=-1)
-        if self.conv_type == '2d':
-            theta = torch.mean(theta, axis=-1)
-        theta = self.fc1(theta)
-        theta = self.relu(theta)
-        theta = self.fc2(theta)
-        theta = 2 * self.sigmoid(theta) - 1
-        return theta
-
-    def forward(self, x):
-        raise NotImplementedError
-
-class DyReLUB(DyReLU):
-    def __init__(self, channels, reduction=72, k=1, conv_type='2d'):
-        super(DyReLUB, self).__init__(channels, reduction, k, conv_type)
-        self.fc2 = nn.Linear(channels // reduction, 2*k*channels)
-
-    def forward(self, x):
-        assert x.shape[1] == self.channels
-        theta = self.get_relu_coefs(x)
-
-        relu_coefs = theta.view(-1, self.channels, 2*self.k) * self.lambdas + self.init_v
-
-        if self.conv_type == '1d':
-            # BxCxL -> LxBxCx1
-            x_perm = x.permute(2, 0, 1).unsqueeze(-1)
-            output = x_perm * relu_coefs[:, :, :self.k] + relu_coefs[:, :, self.k:]
-            # LxBxCx2 -> BxCxL
-            result = torch.max(output, dim=-1)[0].permute(1, 2, 0)
-
-        elif self.conv_type == '2d':
-            # BxCxHxW -> HxWxBxCx1
-            x_perm = x.permute(2, 3, 0, 1).unsqueeze(-1)
-            output = x_perm * relu_coefs[:, :, :self.k] + relu_coefs[:, :, self.k:]
-            # HxWxBxCx2 -> BxCxHxW
-            result = torch.max(output, dim=-1)[0].permute(2, 3, 0, 1)
-
-        return result
-
 class LearnableBias(nn.Module):
     def __init__(self, out_chn):
         super(LearnableBias, self).__init__()
@@ -96,7 +40,6 @@ class LL_residual_blocks(nn.Module):
             itv2 = 4
         res = x
         binary_bias1 = self.aq(self.move0(x), itv1, itv2 )
-        # show_feature_map(torch.sign(x),1)
         out1 = self.conv1(binary_bias1)
         out1 = self.relu11(out1)
 
@@ -121,8 +64,6 @@ class HH_residual_blocks(nn.Module):
 
         self.aq = OursBinActivation()
 
-        # self.attention = DyReLUB(in_channels)
-        
     def forward(self, x, epoch):
         if epoch <= 200:
             itv1 = 2
@@ -143,11 +84,11 @@ class HH_residual_blocks(nn.Module):
 
 
 
-class VDSR(nn.Module):
+class FABNet(nn.Module):
     def __init__(self, args):
-        super(VDSR, self).__init__()
+        super(FABNet, self).__init__()
 
-        self.n_feats = 12
+        self.n_feats = args.n_feats
 
         self.colors = 3
 
@@ -169,14 +110,14 @@ class VDSR(nn.Module):
         self.DWTForward = DWTForward(wave='db1', mode='symmetric')
         self.DWTInverse = DWTInverse(wave='db1', mode='symmetric')
         
-        self.body_LL_1 = LL_residual_blocks()
-        self.body_LL_2 = LL_residual_blocks()
-        self.body_LL_3 = LL_residual_blocks()
-        self.body_LL_4 = LL_residual_blocks()
+        self.body_LL_1 = LL_residual_blocks(in_channels=self.n_feats, out_channels=self.n_feats)
+        self.body_LL_2 = LL_residual_blocks(in_channels=self.n_feats, out_channels=self.n_feats)
+        self.body_LL_3 = LL_residual_blocks(in_channels=self.n_feats, out_channels=self.n_feats)
+        self.body_LL_4 = LL_residual_blocks(in_channels=self.n_feats, out_channels=self.n_feats)
 
 
         HH_modules_body = [
-        HH_residual_blocks() \
+        HH_residual_blocks(in_channels=self.n_feats * 3, out_channels= self.n_feats * 3) \
             for _ in range(8)]      
         self.body_HH = nn.Sequential(*HH_modules_body)
 
@@ -184,6 +125,7 @@ class VDSR(nn.Module):
         self.conv_last_h = nn.Conv2d(self.n_feats, 3, 3, 1, 1)
         self.relu = nn.PReLU()
         self.pixel = nn.PixelShuffle(2)
+
 
 
         self.parameters1 = torch.nn.Parameter(torch.FloatTensor(1, 1, 1, 1), requires_grad=True)
@@ -197,9 +139,6 @@ class VDSR(nn.Module):
         self.parameters3.data.fill_(1 / 5)
         self.parameters4.data.fill_(1 / 5)
         self.parameters5.data.fill_(1 / 5)
-        
-        
-        
 
 
     def forward(self, input, epoch):
@@ -222,7 +161,7 @@ class VDSR(nn.Module):
         input_wavelet_LL_3 = self.body_LL_3(input_wavelet_LL_2, epoch)
         input_wavelet_LL_4 = self.body_LL_4(input_wavelet_LL_3, epoch)
         
-        input_wavelet_LL_final = self.parameters1 * input_wavelet_LL + self.parameters2 * input_wavelet_LL_1 + self.parameters3* input_wavelet_LL_2 + self.parameters4* input_wavelet_LL_3 + self.parameters5 * input_wavelet_LL_4 
+        input_wavelet_LL_final = self.parameters1 * input_wavelet_LL + self.parameters2 * input_wavelet_LL_1 + self.parameters3 * input_wavelet_LL_2 + self.parameters4 * input_wavelet_LL_3 + self.parameters5 * input_wavelet_LL_4 
         out_LL = input_wavelet_LL_final
 
         for i in range(8):
@@ -231,6 +170,7 @@ class VDSR(nn.Module):
         out_H = input_wavelet_H + res_wavelet_H
         out_H = out_H.view(b,c,n,h,w)
         out = self.DWTInverse((out_LL,[out_H]))
+        b, c, h, w = res.shape
     
-        out = self.conv_last_h(out) + res
+        out = self.conv_last_h(out)[:,:,:h,:w] + res
         return out      
